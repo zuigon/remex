@@ -35,7 +35,7 @@ optparse = OptionParser.new do |opts|
     puts "Primjeri:"
     puts "  #{@F} -a 'root:pass' -H 192.168.1.1 -c 'uptime'"
     puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H '192.168.1.101,192.168.1.119' -c 'uptime'"
+    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime'"
     exit
   end
 end
