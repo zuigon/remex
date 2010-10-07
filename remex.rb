@@ -36,6 +36,7 @@ optparse = OptionParser.new do |opts|
     puts "  #{@F} -a 'root:pass' -H 192.168.1.1 -c 'uptime'"
     puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' -c 'uptime'"
     puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime'"
+    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime'"
     exit
   end
 end
