@@ -34,7 +34,7 @@ optparse = OptionParser.new do |opts|
     @opts[:verbose] = 1
   end
 
-  opts.on( '', '--vv', 'Debug ispis' ) do
+  opts.on( '-V', '--vv', 'Debug ispis' ) do
     @opts[:verbose] = 2
   end
 
