@@ -83,7 +83,7 @@ def parse_hosts()
       # Range.new *("1.2.3.4-5"[/\d+\-\d+$/].split('-').map{|x|x.to_i}) => 4..5
       hosts =
         Range.new(*(@opts[:hosts][/\.(\d+\-\d+)$/, 1].split('-').map{|x| x.to_i})).
-        collect {|a| @opts[:hosts][/^\d+\.\d+\.\d+\./] + a}
+        collect {|a| "#{@opts[:hosts][/^\d+\.\d+\.\d+\./]}#{a}"}
     when /^\d+\.\d+\.\d+\.\d+$/ # 192.168.0.123
       hosts << @opts[:hosts]
     when /^.+(\,|\ ).+$/ # 1.2.3.4,1.2.3.5
