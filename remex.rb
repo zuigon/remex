@@ -24,6 +24,11 @@ optparse = OptionParser.new do |opts|
     @opts[:auth] = a
   end
 
+  @opts[:timeout] = nil
+  opts.on( '-t', '--timeout SECS', 'Conn. Timeout (s)' ) do |t|
+    @opts[:timeout] = t
+  end
+
   @opts[:verbose] = nil
   opts.on( '-v', '--verbose', 'Debug ispis' ) do
     @opts[:verbose] = true
@@ -35,8 +40,8 @@ optparse = OptionParser.new do |opts|
     puts "Primjeri:"
     puts "  #{@F} -a 'root:pass' -H 192.168.1.1 -c 'uptime'"
     puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime'"
+    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime' -t 10"
+    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime' -t 10"
     exit
   end
 end
@@ -95,4 +100,4 @@ def parse_hosts()
   return hosts
 end
 
-remex(parse_hosts(), @opts[:cmd], @opts[:auth])
+remex(parse_hosts(), @opts[:cmd], @opts[:auth], @opts[:timeout].to_i)
