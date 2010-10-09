@@ -25,13 +25,17 @@ optparse = OptionParser.new do |opts|
   end
 
   @opts[:timeout] = nil
-  opts.on( '-t', '--timeout SECS', 'Conn. Timeout (s)' ) do |t|
+  opts.on( '-t', '--timeout SECS', 'SSH Conn. Timeout (s)' ) do |t|
     @opts[:timeout] = t
   end
 
   @opts[:verbose] = nil
-  opts.on( '-v', '--verbose', 'Debug ispis' ) do
-    @opts[:verbose] = true
+  opts.on( '-v', '--verbose', 'Verbose' ) do
+    @opts[:verbose] = 1
+  end
+
+  opts.on( '', '--vv', 'Debug ispis' ) do
+    @opts[:verbose] = 2
   end
 
   opts.on( '-h', '--help', 'Ovaj output' ) do
@@ -40,33 +44,36 @@ optparse = OptionParser.new do |opts|
     puts "Primjeri:"
     puts "  #{@F} -a 'root:pass' -H 192.168.1.1 -c 'uptime'"
     puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime' -t 10"
-    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime' -t 10"
+    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime' -t 5 -v"
+    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime' -t 5 --vv"
     exit
   end
 end
 optparse.parse!
 
 def err(t) puts "Error: #{t}"; exit; end
-def v(t) puts "Info: #{t}" if @opts[:verbose]; end
+def v(t) puts "Info: #{t}" if @opts[:verbose]>0; end
+def vv(t) puts "Debug: #{t}" if @opts[:verbose]==2; end
 
 err "No hosts arg" if !@opts[:hosts]
 err "No cmd arg"   if !@opts[:cmd]
 err "No auth arg"  if !@opts[:auth]
 
-v [
+vv [
   "ARGS:",
-  "  hosts: #{@opts[:hosts]}",
-  "  cmd:   #{@opts[:cmd]}",
-  "  auth:  #{@opts[:auth]}"
+  "  hosts:   #{@opts[:hosts]}",
+  "  cmd:     #{@opts[:cmd]}",
+  "  auth:    #{@opts[:auth]}",
+  "  timeout: #{@opts[:timeout]}"
 ].join "\n"
 
 def remex(hosts, cmd, auth, timeout=10)
-  v [
-    "remex:",
-    "  hosts: #{hosts.inspect}",
-    "  cmd:   #{cmd.inspect}",
-    "  auth:  #{auth.inspect}"
+  vv [
+    "remex():",
+    "  hosts:   #{hosts.inspect}",
+    "  cmd:     #{cmd.inspect}",
+    "  auth:    #{auth.inspect}",
+    "  timeout: #{timeout.inspect}"
   ].join "\n"
   Thread.abort_on_exception = true
   threads = []
