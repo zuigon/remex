@@ -3,7 +3,7 @@ require 'rubygems'
 require 'optparse'
 require 'net/ssh'
 
-@F, @V = "remex.rb", "0.1"
+@F, @V = "remex.rb", "0.2"
 
 @opts = {}
 optparse = OptionParser.new do |opts|
@@ -54,22 +54,63 @@ err "No hosts arg" if !@opts[:hosts]
 err "No cmd arg"   if !@opts[:cmd]
 err "No auth arg"  if !@opts[:auth]
 
-def remex(hosts, cmd, auth)
-  puts "remex:"
-  puts "  hosts: #{hosts.inspect}"
-  puts "  cmd: #{cmd.inspect}"
-  puts "  auth: #{auth.inspect}"
+v [
+  "ARGS:",
+  "  hosts: #{@opts[:hosts]}",
+  "  cmd:   #{@opts[:cmd]}",
+  "  auth:  #{@opts[:auth]}"
+].join "\n"
+
+def remex(hosts, cmd, auth, timeout=10)
+  v [
+    "remex:",
+    "  hosts: #{hosts.inspect}",
+    "  cmd:   #{cmd.inspect}",
+    "  auth:  #{auth.inspect}"
+  ].join "\n"
   Thread.abort_on_exception = true
   threads = []
   user, pass = auth.split ':'
   hosts.each { |h|
     threads << Thread.new("t_#{h}") {
-      v "Otvaram SSH konekciju na '#{h}'"
-      Net::SSH.start(h, user, :password => pass) do |ssh|
-        result = ssh.exec!(cmd)
-        puts result
+      v "CONN '#{h}'"
+      begin
+        Net::SSH.start(h, user, :password => pass, :timeout => timeout) do |ssh|
+          result = ssh.exec!(cmd) do |channel, success|
+            unless success
+              abort "#{h}: CMD FAILED (ssh.channel.exec failure)"
+            end
+            channel.on_data do |ch, data| # stdout
+              puts "#{h}: DATA:"
+              puts data
+              puts "END DATA"
+            end
+            channel.on_extended_data do |ch, type, data|
+              next unless type == 1 # stderr
+              # $stderr.print data
+            end
+            channel.on_request("exit-status") do |ch, data|
+              exit_code = data.read_long
+              if exit_code > 0
+                puts "#{h}: EXIT #{exit_code}"
+              else
+                puts "#{h}: OK"
+              end
+            end
+            channel.on_request("exit-signal") do |ch, data|
+              puts "#{h}: SIGNAL #{data.read_long}"
+            end
+          end
+          # puts result
+        end
+        v "CLOSE '#{h}'"
+      rescue Timeout::Error
+        v "TLE '#{h}'"
+      rescue Errno::EHOSTDOWN
+        v "DOWN '#{h}'"
+      rescue
+        v "ERR '#{h}'"
       end
-      v "Zatvaram '#{h}'"
     }
   }
   threads.each {|t| t.join}
