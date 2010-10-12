@@ -3,6 +3,8 @@ require 'rubygems'
 require 'optparse'
 require 'net/ssh'
 
+STDOUT.sync = true
+
 @F, @V = "remex.rb", "0.2"
 
 @opts = {}
@@ -29,7 +31,7 @@ optparse = OptionParser.new do |opts|
     @opts[:timeout] = t
   end
 
-  @opts[:verbose] = nil
+  @opts[:verbose] = 0
   opts.on( '-v', '--verbose', 'Verbose' ) do
     @opts[:verbose] = 1
   end
@@ -52,8 +54,8 @@ end
 optparse.parse!
 
 def err(t) puts "Error: #{t}"; exit; end
-def v(t) puts "Info: #{t}" if @opts[:verbose]>0; end
-def vv(t) puts "Debug: #{t}" if @opts[:verbose]==2; end
+def v(t) print "Info: #{t}\n" if @opts[:verbose]>0; end
+def vv(t) print "Debug: #{t}\n" if @opts[:verbose]==2; end
 
 err "No hosts arg" if !@opts[:hosts]
 err "No cmd arg"   if !@opts[:cmd]
