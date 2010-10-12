@@ -5,7 +5,7 @@ require 'net/ssh'
 
 STDOUT.sync = true
 
-@F, @V = "remex.rb", "0.2"
+@F, @V = "remex.rb", "0.2.2"
 
 @opts = {}
 optparse = OptionParser.new do |opts|
