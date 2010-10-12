@@ -9,7 +9,7 @@ STDOUT.sync = true
 
 @opts = {}
 optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: remex.rb [options]"
+  opts.banner = "Usage: remex.rb [options] <command>"
 
   @opts[:hosts] = nil
   opts.on( '-H', '--hosts HOSTS', 'Host file ili range' ) do |str|
@@ -17,9 +17,6 @@ optparse = OptionParser.new do |opts|
   end
 
   @opts[:cmd] = nil
-  opts.on( '-c', '--cmd CMD', 'Remote command' ) do |cmd|
-    @opts[:cmd] = cmd
-  end
 
   @opts[:auth] = nil
   opts.on( '-a', '--auth CREDS', 'SSH username i password (user:pass)' ) do |a|
@@ -44,10 +41,10 @@ optparse = OptionParser.new do |opts|
     puts "#{@F} v#{@V}"
     puts opts
     puts "Primjeri:"
-    puts "  #{@F} -a 'root:pass' -H 192.168.1.1 -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' -c 'uptime'"
-    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -c 'uptime' -t 5 -v"
-    puts "  #{@F} -a 'root:pass' -H hostovi.txt -c 'uptime' -t 5 --vv"
+    puts "  #{@F} -a 'root:pass' -H 192.168.1.1 uptime"
+    puts "  #{@F} -a 'root:pass' -H '192.168.1.1,192.168.1.2' uptime"
+    puts "  #{@F} -a 'root:pass' -H '192.168.1.101-119' -t 5 -v -- ls -la /"
+    puts "  #{@F} -a 'root:pass' -H hostovi.txt -t 5 --vv -- ls -la /"
     exit
   end
 end
@@ -57,16 +54,18 @@ def err(t) puts "Error: #{t}"; exit; end
 def v(t) print "Info: #{t}\n" if @opts[:verbose]>0; end
 def vv(t) print "Debug: #{t}\n" if @opts[:verbose]==2; end
 
+@opts[:cmd] = (ARGV.join ' ' if ARGV.size>0) || nil
+
 err "No hosts arg" if !@opts[:hosts]
 err "No cmd arg"   if !@opts[:cmd]
 err "No auth arg"  if !@opts[:auth]
 
 vv [
   "ARGS:",
-  "  hosts:   #{@opts[:hosts]}",
-  "  cmd:     #{@opts[:cmd]}",
-  "  auth:    #{@opts[:auth]}",
-  "  timeout: #{@opts[:timeout]}"
+  "  hosts:   #{@opts[:hosts].inspect}",
+  "  cmd:     #{@opts[:cmd].inspect}",
+  "  auth:    #{@opts[:auth].inspect}",
+  "  timeout: #{@opts[:timeout].inspect}"
 ].join "\n"
 
 def remex(hosts, cmd, auth, timeout=10)
